@@ -1,3 +1,4 @@
+import os, random,requests,urllib,pymysql,re
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from pandas import DataFrame
@@ -10,9 +11,9 @@ from tkinter import *
 from tkinter import ttk
 from PIL import Image, ImageTk
 
-connection = pymysql.connect(host='localhost',user='root',password='123123',db='abc_db',charset='utf8mb4',cursorclass=pymysql.cursors.DictCursor)
-matplotlib.rc('font', family = fm.FontProperties(fname = 'C:/Windows/Fonts/HBATANG.ttf').get_name())
-cursor = connection.cursor()
+#connection = pymysql.connect(host='localhost',user='root',password='123123',db='abc_db',charset='utf8mb4',cursorclass=pymysql.cursors.DictCursor)
+matplotlib.rc('font', family = fm.FontProperties(fname = 'C:/Windows/Fonts/arial.ttf').get_name())
+#cursor = connection.cursor()
 
 class loggin(): #로그인창 완성 일부러 loggin한거니까 태클 ㄴㄴ
     def __init__(self,window):
@@ -36,15 +37,14 @@ class loggin(): #로그인창 완성 일부러 loggin한거니까 태클 ㄴㄴ
     def Check_ID(self):
         try:
             sql = 'SELECT * FROM `ID` WHERE `Username` = %s'
-            cursor.execute(sql, (self.ID_data.get()), )
-            result = cursor.fetchone()
-            if result['Password'] == self.password_data.get():
-                self.window.withdraw()
-                self.newWindow = Toplevel(self.window)
-                Sub = main_gui(self.newWindow)
-
-            else:
-                print('비번오류')
+            #cursor.execute(sql, (self.ID_data.get()), )
+            #result = cursor.fetchone()
+            #if result['Password'] == self.password_data.get():
+            self.window.withdraw()
+            self.newWindow = Toplevel(self.window)
+            Sub = main_gui(self.newWindow)
+            #else:
+            #    print('비번오류')
 
         except:
             print('아이디 오류')
@@ -188,14 +188,14 @@ class main_gui():
     def f2_renew(self):
         self.Treeviewf2_1.delete(*self.Treeviewf2_1.get_children())
         sql = 'SELECT * FROM `fruits1`'
-        cursor.execute(sql)
-        self.rows1 = cursor.fetchall()
+        #cursor.execute(sql)
+        #self.rows1 = cursor.fetchall()
         sql = 'SELECT * FROM `fruits2`'
-        cursor.execute(sql)
-        self.rows2 = cursor.fetchall()
+        #cursor.execute(sql)
+        #self.rows2 = cursor.fetchall()
 
-        for x in range(len(self.rows1)):
-               self.Treeviewf2_1.insert('', 'end', text=self.rows1[x].get('num'), values=(self.rows2[x].get('keyword'),self.rows1[x].get('name'),self.rows1[x].get('score')))
+        #for x in range(len(self.rows1)):
+        #       self.Treeviewf2_1.insert('', 'end', text=self.rows1[x].get('num'), values=(self.rows2[x].get('keyword'),self.rows1[x].get('name'),self.rows1[x].get('score')))
 
 
     def change_page_next(self):
@@ -221,7 +221,7 @@ class main_gui():
 
     def crawling(self):
         self.keyword = self.input.get()
-        self.outpath = "C:/test/"
+        self.outpath = "./crawling/"
         self.label5.config(text=self.keyword + ' 검색중')
         self.url = 'https://www.google.co.kr/search?q=' + self.keyword + '&source=lnms&tbm=isch&sa=X&ved=0ahUKEwic-taB9IXVAhWDHpQKHXOjC14Q_AUIBigB&biw=1842&bih=990'
         self.imgs = parse(StringIO(requests.get(self.url).text)).getroot().findall('.//img')
@@ -259,7 +259,7 @@ class main_gui():
 
             try:
 
-                connection.commit()
+                #connection.commit()
 
 
                 a, b = self.main(self.image_dir)
@@ -269,17 +269,17 @@ class main_gui():
                 self.mat_plot(self.df)
                 try:
                     sql = "Insert into `fruits1` (`name`, `score`) values (%s, %s) "
-                    cursor.execute(sql, (str(a[b_max_index]), str(b[b_max_index])))
+                    #cursor.execute(sql, (str(a[b_max_index]), str(b[b_max_index])))
                     sql = "Insert into `fruits2` (`name`, `keyword`, `dir`) values (%s, %s, %s) "
-                    tmp1 = self.image_dir.lstrip('C:/test/').rstrip('.jpg')
+                    tmp1 = self.image_dir.lstrip('./crawling/').rstrip('.jpg')
                     tmp2 = re.findall('\d+', tmp1)[0]
                     tmp1 = tmp1.rstrip(tmp2)
-                    cursor.execute(sql, (str(a[b_max_index]), str(tmp1), str(tmp2)))
+                    #cursor.execute(sql, (str(a[b_max_index]), str(tmp1), str(tmp2)))
                     sql = "Insert into `fruits3` (`name`, `score`) values (%s, %s) "
                     # Execute sql.
-                    for i in range(self.df.shape[0]):
-                        cursor.execute(sql, (self.df.values[i][0], self.df.values[i][1]))
-                    connection.commit()
+                    #for i in range(self.df.shape[0]):
+                    #    cursor.execute(sql, (self.df.values[i][0], self.df.values[i][1]))
+                    #connection.commit()
                 except:
                     self.label3.config(text='DB 테이블에 중복 다음사진을 누르세요')
             except:
@@ -336,10 +336,10 @@ class main_gui():
 
 class alpha:
     def random_file():
-        randomfile_path = "C:/test"
+        randomfile_path = "./crawling"
         random_filename = random.choice(
             [x for x in os.listdir(randomfile_path) if os.path.isfile(os.path.join(randomfile_path, x))])
-        image_dir = "C:/test/" + str(random_filename)
+        image_dir = "./crawling/" + str(random_filename)
         return image_dir
 
     def fileload(image_dir):
@@ -372,10 +372,10 @@ class alpha:
 
 
 def main():
-    alpha.init_sql()
+    #alpha.init_sql()
     window = Tk()
     loggin(window)
     window.mainloop()
 
 if __name__ == "__main__":
-    main()</pre>
+    main()

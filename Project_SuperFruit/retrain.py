@@ -134,7 +134,7 @@ def create_image_lists(image_dir, testing_percentage, validation_percentage):
         testing_images = []
         validation_images = []
         for file_name in file_list:
-            base_name = os.path.commonprefix(file_name)
+            base_name = os.path.basename(file_name)
             # We want to ignore anything after '_nohash_' in the file name when
             # deciding which set to put an image in, the data set creator has a way of
             # grouping photos that are close variations of each other. For example
@@ -350,7 +350,7 @@ def get_or_create_bottleneck(sess, image_lists, label_name, index, image_dir,
                                     category)
         if not gfile.Exists(image_path):
             tf.logging.fatal('File does not exist %s', image_path)
-        image_data = gfile.FastGFile(image_path, 'rb').read()
+        image_data = gfile.GFile(image_path, 'rb').read()
         bottleneck_values = run_bottleneck_on_image(sess, image_data,
                                                     jpeg_data_tensor,
                                                     bottleneck_tensor)
@@ -496,7 +496,7 @@ def get_random_distorted_bottlenecks(
                                     category)
         if not gfile.Exists(image_path):
             tf.logging.fatal('File does not exist %s', image_path)
-        jpeg_data = gfile.FastGFile(image_path, 'rb').read()
+        jpeg_data = gfile.GFile(image_path, 'rb').read()
         # Note that we materialize the distorted_image_data as a numpy array before
         # sending running inference on the image. This involves 2 memory copies and
         # might be optimized in other implementations.
@@ -830,9 +830,9 @@ def main(_):
     # Write out the trained graph and labels with the weights stored as constants.
     output_graph_def = graph_util.convert_variables_to_constants(
         sess, graph.as_graph_def(), [FLAGS.final_tensor_name])
-    with gfile.FastGFile(FLAGS.output_graph, 'wb') as f:
+    with gfile.GFile(FLAGS.output_graph, 'wb') as f:
         f.write(output_graph_def.SerializeToString())
-    with gfile.FastGFile(FLAGS.output_labels, 'w') as f:
+    with gfile.GFile(FLAGS.output_labels, 'w') as f:
         f.write('\n'.join(image_lists.keys()) + '\n')
 
 
@@ -841,31 +841,31 @@ if __name__ == '__main__':
     parser.add_argument(
         '--image_dir',
         type=str,
-        default='./workspace/fruits_photos',
+        default='./tmp/image',
         help='Path to folders of labeled images.'
     )
     parser.add_argument(
         '--output_graph',
         type=str,
-        default='./workspace/fruits_graph.pb',
+        default='./tmp/output_graph.pb',
         help='Where to save the trained graph.'
     )
     parser.add_argument(
         '--output_labels',
         type=str,
-        default='./workspace/fruits_labels.txt',
+        default='./tmp/output_labels.txt',
         help='Where to save the trained graph\'s labels.'
     )
     parser.add_argument(
         '--summaries_dir',
         type=str,
-        default='/workspace/retrain_logs/',
+        default='./tmp/retrain_logs',
         help='Where to save summary logs for TensorBoard.'
     )
     parser.add_argument(
         '--how_many_training_steps',
         type=int,
-        default=1000,
+        default=100,
         help='How many training steps to run before ending.'
     )
     parser.add_argument(
@@ -895,7 +895,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--train_batch_size',
         type=int,
-        default=100,
+        default=20,
         help='How many images to train on at a time.'
     )
     parser.add_argument(
@@ -912,7 +912,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--validation_batch_size',
         type=int,
-        default=100,
+        default=20,
         help="""\
       How many images to use in an evaluation batch. This validation set is
       used much more often than the test set, and is an early indicator of how
@@ -933,7 +933,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--model_dir',
         type=str,
-        default='./workspace/inception',
+        default='./tmp/imagenet',
         help="""\
       Path to classify_image_graph_def.pb,
       imagenet_synset_to_human_label_map.txt, and
@@ -943,7 +943,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--bottleneck_dir',
         type=str,
-        default='./workspace/bottlenecks',
+        default='./tmp/bottleneck',
         help='Path to cache bottleneck layer values as files.'
     )
     parser.add_argument(
